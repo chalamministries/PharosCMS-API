@@ -24,6 +24,7 @@ All endpoints are served over HTTPS at `https://api.pharoscms.com`.
 | Method | Path | Description |
 |--------|------|-------------|
 | `POST` | `/cases/draft` | Create new case draft (step 1) |
+| `GET`  | `/cases/types` | **New**: List all case types (id, name, description) |
 | `POST` | `/cases/{case_id}/participants` | Add participants to existing case |
 | `POST` | `/cases/{case_id}/objectives` | Add objectives to case |
 | `POST` | `/cases/{case_id}/assign` | Assign investigator to case |
@@ -37,6 +38,17 @@ All endpoints are served over HTTPS at `https://api.pharoscms.com`.
 | `GET`  | `/cases/{case_id}/activities` | List all activities for case |
 | `POST` | `/cases/{case_id}/activities` | Create new activity |
 | `GET`  | `/cases/{case_id}/audit-logs` | Retrieve audit trail for case |
+
+## 🔐 Authentication
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/auth/login` | Client/investigator/admin login → returns JWT ⚠️ Rate limited: 5 attempts/IP/hour |
+| `POST` | `/auth/logout` | Invalidate current session token |
+| `GET`  | `/auth/verify` | Validate JWT token (used for auth guards) |
+| `POST` | `/auth/change-password` | Change password (requires valid token) |
+| `POST` | `/auth/refresh` | **New**: Rotate short-lived JWT using long-lived refresh token |
+| `GET`  | `/activity_type/list` | **New**: List all activity types (id, name, description) |
 
 ---
 
