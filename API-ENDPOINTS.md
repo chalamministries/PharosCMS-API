@@ -11,7 +11,7 @@ All endpoints are served over HTTPS at `https://api.pharoscms.com`.
 
 | Method | Path | Description |
 |--------|------|-------------|
-| `POST` | `/auth/login` | Client/investigator/admin login → returns JWT |
+| `POST` | `/auth/login` | Client/investigator/admin login → returns JWT ⚠️ Rate limited: 5 attempts/IP/hour |
 | `POST` | `/auth/logout` | Invalidate current session token |
 | `GET`  | `/auth/verify` | Validate JWT token (used for auth guards) |
 | `POST` | `/auth/change-password` | Change password (requires valid token) |

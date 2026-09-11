@@ -1,8 +1,36 @@
 <?php
+// Rate limiting: block IPs with >5 failed attempts in last hour
+$ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+$rateLimitFile = __DIR__ . '/../../logs/rate_limit.log';
+$window = 3600; // 1 hour
+$maxAttempts = 5;
+
+// Read existing attempts
+$attempts = [];
+if (file_exists($rateLimitFile)) {
+    $lines = file($rateLimitFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+        [$storedIp, $timestamp] = explode('|', $line, 2);
+        if ($storedIp === $ip && (time() - (int)$timestamp) < $window) {
+            $attempts[] = (int)$timestamp;
+        }
+    }
+}
+
+// Block if over limit
+if (count($attempts) >= $maxAttempts) {
+    http_response_code(429);
+    echo json_encode(['error' => 'Too many login attempts. Please try again later.']);
+    exit;
+}
+
+// Log this attempt (will be pruned later)
+file_put_contents($rateLimitFile, "$ip|" . time() . "\n", FILE_APPEND | LOCK_EX);
+
 /**
  * Login Endpoint
  * POST /api/auth/login
- * 
+ *
  * Authenticates users (clients, investigators, admins) and returns JWT token
  */
 
