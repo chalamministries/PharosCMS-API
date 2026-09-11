@@ -12,9 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 try {
     $pdo = PDOWrapper::instance();
 
-    $stmt = $pdo->prepare("SELECT id, name, description FROM activity_type ORDER BY name");
-    $stmt->execute();
-    $activityTypes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $activityTypes = $pdo->select('activity_type', [], ['id', 'name', 'description'], 'name');
 
     http_response_code(200);
     echo json_encode(['activity_types' => $activityTypes]);

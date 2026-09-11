@@ -12,9 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 try {
     $pdo = PDOWrapper::instance();
 
-    $stmt = $pdo->prepare("SELECT id, name, description FROM case_types ORDER BY name");
-    $stmt->execute();
-    $caseTypes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $caseTypes = $pdo->select('case_types', [], ['id', 'name', 'description'], 'name');
 
     http_response_code(200);
     echo json_encode(['case_types' => $caseTypes]);
