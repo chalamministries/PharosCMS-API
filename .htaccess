@@ -1,0 +1,50 @@
+# Enable URL Rewriting
+RewriteEngine On
+
+# CRITICAL: Disable automatic directory slash redirect (this converts POST to GET!)
+DirectorySlash Off
+
+# Preserve Authorization header
+RewriteCond %{HTTP:Authorization} .
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+# Security: Prevent direct access to config and helper files
+<FilesMatch "^(config|database|JWT|Auth|Response|PDOWrapper)\.php$">
+    Require all denied
+</FilesMatch>
+
+# Disable directory listing
+Options -Indexes
+
+<IfModule mod_headers.c>
+    # Always set Vary header for proper caching
+    Header always set Vary "Origin"
+
+    # Allow requests from mypharos.cc (exact match)
+    SetEnvIf Origin "^https://mypharos\.cc$" IS_CORS_ORIGIN=1
+
+    # Allow requests from subdomains like app.mypharos.cc if needed
+    # SetEnvIf Origin "^https://[a-z0-9.-]*mypharos\.cc$" IS_CORS_ORIGIN=1
+
+    # Apply CORS headers only when origin matches
+    Header always set Access-Control-Allow-Origin "https://mypharos.cc" env=IS_CORS_ORIGIN
+    Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS, PATCH" env=IS_CORS_ORIGIN
+    Header always set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With" env=IS_CORS_ORIGIN
+    Header always set Access-Control-Allow-Credentials "true" env=IS_CORS_ORIGIN
+    Header always set Access-Control-Max-Age "3600" env=IS_CORS_ORIGIN
+</IfModule>
+
+# Handle OPTIONS preflight requests
+RewriteCond %{REQUEST_METHOD} OPTIONS
+RewriteCond %{HTTP:Origin} ^https://mypharos\.cc$
+RewriteRule .* - [R=200,L]
+
+# Remove trailing slashes from any request (prevents directory redirects that strip POST method)
+# Use 307 to preserve the HTTP method
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_URI} ^(.+)/$
+RewriteRule ^(.+)/$ /$1 [R=307,L]
+
+# Route everything to index.php - IGNORE directories completely
+RewriteCond %{REQUEST_URI} !^/api/index\.php$
+RewriteRule ^(.*)$ index.php [QSA,L]
