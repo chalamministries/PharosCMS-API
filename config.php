@@ -4,10 +4,26 @@
  * Contains database credentials and JWT settings
  */
 
+// CORS: allow only trusted frontend origins
+$allowedOrigins = ['https://mypharos.cc', 'https://pharoscms.com'];
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+if (in_array($origin, $allowedOrigins)) {
+    header("Access-Control-Allow-Origin: $origin");
+    header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
+    header('Access-Control-Allow-Headers: Authorization, Content-Type, X-Requested-With');
+    header('Access-Control-Allow-Credentials: false');
+    header('Access-Control-Max-Age: 86400');
+}
+
+// Handle preflight OPTIONS
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit;
+}
+
 // Error reporting
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-require_once '../includes/config.php'; //main config file that already calls PDOWrapper
+error_reporting(E_ALL & ~E_NOTICE); // Keep critical errors only
+ini_set('display_errors', 0); // 🔒 CRITICAL: Never expose errors in production
 
 
 // JWT Configuration
